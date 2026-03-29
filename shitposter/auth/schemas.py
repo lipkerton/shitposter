@@ -7,7 +7,7 @@ class OpenSessionRequest(
     tag="osmreq",
     nsmap={
         '': 'http://ifx.ru/IFXWebService',
-        'soap': 'http://ifx.ru/IFXWebService'  
+        'soap': 'http://ifx.ru/IFXWebService'
     }
 ):
     mbci: str = element(tag="mbci")    # тип клиента.
@@ -19,7 +19,14 @@ class OpenSessionRequest(
     mbp: str = element(tag="mbp")      # пароль пользователя.
     mbt: str = element(tag="mbt")      # хз.
 
-class OpenSessionResponse(BodyContent, tag="osmresp"):
+class OpenSessionResponse(
+    BodyContent,
+    tag="osmresp",
+    nsmap={
+        '': 'http://ifx.ru/IFXWebService',
+        'soap': 'http://ifx.ru/IFXWebService'
+    }
+):
     mbr: bool = element(tag="mbr")     # хз.
     mbsid: str = element(tag="mbsid")  # идентификатор открытой сессии.
 
