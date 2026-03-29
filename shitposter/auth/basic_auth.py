@@ -7,7 +7,10 @@ from fastapi_soap.models import BodyContent
 from auth.schemas import OpenSessionRequest, OpenSessionResponse
 
 
-soap = SoapRouter(name="OpenSession", prefix="/IFXService.svc")
+soap = SoapRouter(
+    name="OpenSession",
+    prefix="/IFXService.svc"
+)
 pwd_context = CryptContext(
     schemes=["bcrypt", "sha256_crypt"], deprecated="auto"
 )
@@ -20,7 +23,7 @@ my_user = {
 }
 
 def check_password(username: str, password: str):
-    return pwd_context.verify_and_update(password, my_user.username.hashed_password)
+    return pwd_context.verify_and_update(password, my_user[username]["hashed_password"])
 
 
 @soap.operation(

@@ -8,12 +8,12 @@
         <osmreq xmlns="http://ifx.ru/IFXWebService">
             <mbci>client_type</mbci>
             <mbcv>1.0</mbcv>
-            <mbh>OnluHeadline</mbh>
+            <mbh>OnlyHeadline</mbh>
             <mbi>lipkerton</mbi>
             <mbla>ru-RU</mbla>
             <mbo>OS Name</mbo>
-            <mbp>password</mbp>
-            <mbt></mbt>
+            <mbp>super-secret</mbp>
+            <mbt>what</mbt>
         </osmreq>
     </soapenv:Body>
 </soapenv:Envelope>
