@@ -1,0 +1,10 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+    <soapenv:Body>
+        <Operands>
+            <!--Zero or more repetitions:-->
+            <Operand>1</Operand>
+            <Operand>2</Operand>
+            <Operand>3</Operand>
+        </Operands>
+    </soapenv:Body>
+</soapenv:Envelope>
