@@ -36,9 +36,11 @@ def open_session(body: OpenSessionRequest = XMLBody(OpenSessionRequest)):
         return
     if not check_password(body.mbi, body.mbp):
         return
-    return SoapResponse(
+    response = SoapResponse(
         OpenSessionResponse(
             mbr="false",
             mbsid=""
         )
     )
+    response.set_cookie(key="fakesession", value="fake-cookie-session-value")
+    return response
