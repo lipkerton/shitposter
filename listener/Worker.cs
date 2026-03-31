@@ -1,4 +1,4 @@
-using System.Collections;
+using System;
 using System.Net;
 using System.Text;
 
@@ -25,37 +25,25 @@ public class Worker : BackgroundService
     }
     protected override async Task ExecuteAsync(CancellationToken cancelToken)
     {
-        string apiUrl = _configuration["ApiSettings:SOAPEndpoint"] ?? "http://localhost:8000/IFXService.svc";
         string xmlPath = _configuration["ApiSettings:RequestsFolder"] ?? "Requests";
 
-        while (!cancelToken.IsCancellationRequested)
-        {
-            if (_logger.IsEnabled(LogLevel.Information))
-            {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-            }
+        string openSessionURL = _configuration["ApiSettings:Auth:Endpoint"] ?? "http://localhost:8000/IFXService.svc/OpenSession";
+        string openSessionXML = Path.Combine(xmlPath, _configuration["ApiSettings:Auth:XML"] ?? "OpenSession.xml");
+        int openSessionINT = int.Parse(_configuration["ApiSettings:Auth:Interval"] ?? "1440");
 
-            try
-            {
-                await OpenSession(apiUrl, xmlPath, cancelToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Ошибка: {message}", ex.Message);
-            }
+        await OpenSession(openSessionURL, openSessionXML, openSessionINT, cancelToken);
 
-            await Task.Delay(10000, cancelToken);
-        }
+        await Task.Delay(10000, cancelToken);
     }
 
-    private async Task OpenSession(string url, string path, CancellationToken cancelToken)
+    private async Task OpenSession(string url, string path, int interval, CancellationToken cancelToken)
     {
         HttpClient client = _httpClientFactory.CreateClient("SOAPClient");
-        string xmlContent = await File.ReadAllTextAsync($"{path}\\request_open_session.xml", cancelToken);
+        string xmlContent = await File.ReadAllTextAsync(path, cancelToken);
         StringContent content = new StringContent(xmlContent, Encoding.UTF8, "text/xml");
 
-        _logger.LogInformation("Запрос на {url}/OpenSession...", url);
-        HttpResponseMessage response = await client.PostAsync($"{url}/OpenSession", content, cancelToken);
+        _logger.LogInformation("Запрос на {url}", url);
+        HttpResponseMessage response = await client.PostAsync(url, content, cancelToken);
 
         CookieCollection cookie = _cookieContainer.GetCookies(new Uri(url));
 
