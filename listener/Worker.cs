@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Net;
 using System.Text;
 
 namespace listener;
@@ -8,16 +9,19 @@ public class Worker : BackgroundService
     private readonly ILogger<Worker> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
+    private readonly CookieContainer _cookieContainer;
 
     public Worker (
         ILogger<Worker> logger,
         IHttpClientFactory httpClientFactory,
-        IConfiguration configuration
+        IConfiguration configuration,
+        CookieContainer cookieContainer
     )
     {
         _logger = logger;
         _httpClientFactory = httpClientFactory;
         _configuration = configuration;
+        _cookieContainer = cookieContainer;
     }
     protected override async Task ExecuteAsync(CancellationToken cancelToken)
     {
@@ -53,7 +57,10 @@ public class Worker : BackgroundService
         _logger.LogInformation("Запрос на {url}/OpenSession...", url);
         HttpResponseMessage response = await client.PostAsync($"{url}/OpenSession", content, cancelToken);
 
+        CookieCollection cookie = _cookieContainer.GetCookies(new Uri(url));
+
         string responseBody = await response.Content.ReadAsStringAsync(cancelToken);
+        _logger.LogInformation("Куки: {Cookie}", cookie.Count);
         _logger.LogInformation("Ответ: {Body}", responseBody);
     }
 }
