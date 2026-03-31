@@ -46,7 +46,7 @@ public class Worker : BackgroundService
 
     private async Task OpenSession(string url, string path, CancellationToken cancelToken)
     {
-        HttpClient client = _httpClientFactory.CreateClient();
+        HttpClient client = _httpClientFactory.CreateClient("SOAPClient");
         string xmlContent = await File.ReadAllTextAsync($"{path}\\request_open_session.xml", cancelToken);
         StringContent content = new StringContent(xmlContent, Encoding.UTF8, "text/xml");
 
