@@ -25,18 +25,37 @@ public class Worker : BackgroundService
     }
     protected override async Task ExecuteAsync(CancellationToken cancelToken)
     {
-        string xmlPath = _configuration["ApiSettings:RequestsFolder"] ?? "Requests";
+        string xmlPath = Path.GetFullPath(
+            _configuration.GetValue(
+                "ApiSettings:RequestsFolder",
+                "Requests"
+            )
+        );
 
-        string openSessionURL = _configuration["ApiSettings:Auth:Endpoint"] ?? "http://localhost:8000/IFXService.svc/OpenSession";
-        string openSessionXML = Path.Combine(xmlPath, _configuration["ApiSettings:Auth:XML"] ?? "OpenSession.xml");
-        int openSessionINT = int.Parse(_configuration["ApiSettings:Auth:Interval"] ?? "1440");
+        string openSessionURL = _configuration.GetValue<string>(
+            "ApiSettings:Auth:Endpoint",
+            "http://localhost:8000/IFXService.svc/OpenSession"
+        );
+        string openSessionXML = Path.Combine(
+            xmlPath,
+            _configuration.GetValue<string>(
+                "ApiSettings:Auth:XML",
+                "OpenSession.xml"
+            )
+        );
+        TimeSpan openSessionINT = TimeSpan.FromMinutes(
+            _configuration.GetValue<int>(
+                "ApiSettings:Auth:Interval",
+                1440
+            )
+        );
 
         await OpenSession(openSessionURL, openSessionXML, openSessionINT, cancelToken);
 
         await Task.Delay(10000, cancelToken);
     }
 
-    private async Task OpenSession(string url, string path, int interval, CancellationToken cancelToken)
+    private async Task OpenSession(string url, string path, TimeSpan interval, CancellationToken cancelToken)
     {
         HttpClient client = _httpClientFactory.CreateClient("SOAPClient");
         string xmlContent = await File.ReadAllTextAsync(path, cancelToken);
