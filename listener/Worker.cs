@@ -10,7 +10,8 @@ public class Worker : BackgroundService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
     private readonly CookieContainer _cookieContainer;
-    private DateTime _lastTime = DateTime.MinValue;
+    private DateTime _lastOpenSession = DateTime.MinValue;
+    private DateTime _lastGetRealtime = DateTime.MinValue;
 
     public Worker (
         ILogger<Worker> logger,
@@ -71,11 +72,12 @@ public class Worker : BackgroundService
         while (!cancelToken.IsCancellationRequested) {
             try 
             {
-                if (DateTime.UtcNow - _lastTime >= openSessionINT) {
+                if (DateTime.UtcNow - _lastOpenSession >= openSessionINT) {
                     bool openSession = await OpenSession(openSessionURL, openSessionXML, cancelToken);
 
                     if (openSession)
                     {
+                        _lastOpenSession = DateTime.UtcNow;
                         _logger.LogInformation($"Сессия успешно обновлена. Следующее обновление через {openSessionINT} минут...");
                     }
                     else
@@ -85,12 +87,13 @@ public class Worker : BackgroundService
                         continue;
                     }
                 }
-                if (DateTime.UtcNow - _lastTime >= getRealtimeNewsByProductINT) {
+                if (DateTime.UtcNow - _lastGetRealtime >= getRealtimeNewsByProductINT) {
                     bool getRealtimeNewsByProduct = await GetRealtimeNewsByProduct(getRealtimeNewsByProductURL, getRealtimeNewsByProductXML, cancelToken);
 
                     if (getRealtimeNewsByProduct)
                     {
-                        _logger.LogInformation($"Сессия успешно обновлена. Следующее обновление через {getRealtimeNewsByProductINT} минут...");                        
+                        _lastGetRealtime = DateTime.UtcNow;
+                        _logger.LogInformation($"Новости получены. Следующий запрос через {getRealtimeNewsByProductINT} минут...");                        
                     }
                     else
                     {
