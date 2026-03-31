@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic_xml import element
 from fastapi_soap.models import BodyContent
 
@@ -17,7 +19,10 @@ class OpenSessionRequest(
     mbla: str = element(tag="mbla")    # язык интерфейса пользователя.
     mbo: str = element(tag="mbo")      # операционная система.
     mbp: str = element(tag="mbp")      # пароль пользователя.
-    mbt: str = element(tag="mbt")      # хз.
+    mbt: Optional[str] = element(
+        tag="mbt",
+        default=None
+    )                                  # хз.
 
 class OpenSessionResponse(
     BodyContent,
