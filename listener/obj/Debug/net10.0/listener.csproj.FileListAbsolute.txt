@@ -48,3 +48,6 @@ F:\CODE\C#_code\shitpost_listener\listener\obj\Debug\net10.0\refint\listener.dll
 F:\CODE\C#_code\shitpost_listener\listener\obj\Debug\net10.0\listener.pdb
 F:\CODE\C#_code\shitpost_listener\listener\obj\Debug\net10.0\listener.genruntimeconfig.cache
 F:\CODE\C#_code\shitpost_listener\listener\obj\Debug\net10.0\ref\listener.dll
+F:\CODE\C#_code\shitpost_listener\listener\bin\Debug\net10.0\Pipelines.Sockets.Unofficial.dll
+F:\CODE\C#_code\shitpost_listener\listener\bin\Debug\net10.0\StackExchange.Redis.dll
+F:\CODE\C#_code\shitpost_listener\listener\bin\Debug\net10.0\System.IO.Hashing.dll

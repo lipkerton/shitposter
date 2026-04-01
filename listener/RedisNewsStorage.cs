@@ -5,6 +5,7 @@ using StackExchange.Redis;
 public interface INewsStorage
 {
     Task SaveNews((string, string, string, string)[] newsItems);
+    Task CleanUpOldNews(TimeSpan cleanUpInterval);
 }
 
 public class RedisNewsStorage : INewsStorage
@@ -38,5 +39,11 @@ public class RedisNewsStorage : INewsStorage
             await batch.SortedSetAddAsync(SortedSetKey, newsId, score);
         }
         batch.Execute();
+    }
+
+    public async Task CleanUpOldNews (TimeSpan cleanUpInterval)
+    {
+        long minTicks = DateTime.UtcNow.Subtract(cleanUpInterval).Ticks;
+        long removed = await _redisDatabase.SortedSetRemoveRangeByScoreAsync(SortedSetKey, 0, minTicks);
     }
 }

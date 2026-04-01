@@ -87,6 +87,32 @@ public class Worker : BackgroundService
                 "GetRealtimeByProduct.xml"
             )
         );
+        TimeSpan cleanUpInterval = TimeSpan.FromMinutes(
+            _configuration.GetValue<int>(
+                "ApiSettings:CleanUpInterval",
+                1440
+            )
+        );
+
+        Task mainTask = RunMain(
+            openSessionURL, openSessionXML, openSessionINT,
+            getRealtimeNewsByProductURL, getRealtimeNewsByProductXML, getRealtimeNewsByProductINT,
+            getEntireNewsByIdURL, getEntireNewsByIdXML,
+            cancelToken
+        );
+        Task cleanupTask = RunCleanUp(
+            cleanUpInterval, cancelToken
+        );
+        await Task.WhenAll(mainTask, cleanupTask);
+    }
+
+    private async Task RunMain(
+        string openSessionURL, string openSessionXML, TimeSpan openSessionINT,
+        string getRealtimeNewsByProductURL, string getRealtimeNewsByProductXML, TimeSpan getRealtimeNewsByProductINT,
+        string getEntireNewsByIdURL, string getEntireNewsByIdXML,
+        CancellationToken cancelToken
+    )
+    {
         while (!cancelToken.IsCancellationRequested) {
             try 
             {
@@ -137,8 +163,22 @@ public class Worker : BackgroundService
                 _logger.LogError(ex, "Ошибка в основном цикле `Worker.ExecuteAsync`.");
             }
         }
+    }
 
-        await Task.Delay(10000, cancelToken);
+    private async Task RunCleanUp(TimeSpan cleanUpInterval, CancellationToken cancelToken)
+    {
+        while (!cancelToken.IsCancellationRequested)
+        {
+            await Task.Delay(cleanUpInterval, cancelToken);
+            try
+            {
+                await _newsStorage.CleanUpOldNews(cleanUpInterval);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при очистке новостей!");
+            }
+        }
     }
 
     private async Task<bool> OpenSession(string url, string path, CancellationToken cancelToken)
