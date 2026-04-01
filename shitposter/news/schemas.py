@@ -49,10 +49,10 @@ class NewsList(
 
 class GetRealtimeNewsByProductResponse(
     BodyContent,
-    tag="grnbpmresp",
+    tag="grnmresp",
     nsmap={
-        '': 'http://ifx.ru/IFXWebService',
-        'soap': 'http://ifx.ru/IFXWebService'
+        '': 'http://ifx.ru/IFX3WebService',
+        'soap': 'http://ifx.ru/IFX3WebService'
     }
 ):
     maxcount: int = element(tag="maxcount")
