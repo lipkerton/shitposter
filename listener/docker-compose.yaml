@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: news-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+
+  soap-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: soap-worker
+    environment:
+      - Redis__RedisConnection=redis:6379
+      - ApiSettings__OpenSession__Endpoint=http://services.ifx.ru/IFXService.svc/OpenSession
+      - ApiSettings__OpenSession__XML=OpenSession.xml
+      - ApiSettings__OpenSession__Interval=1440
+      - ApiSettings__GetRealtimeNewsByProduct__Endpoint=http://services.ifx.ru/IFXService.svc/GetRealtimeNewsByProduct
+      - ApiSettings__GetRealtimeNewsByProduct__XML=GetRealtimeNewsByProduct.xml
+      - ApiSettings__GetRealtimeNewsByProduct__Interval=60
+      - ApiSettings__GetEntireNewsByID__Endpoint=http://services.ifx.ru/IFXService.svc/GetEntireNewsByID
+      - ApiSettings__GetEntireNewsByID__XML=GetEntireNewsByID.xml
+      - ApiSettings__RequestsFolder=/app/Requests
+    volumes:
+      - ./Requests:/app/Requests
+    depends_on:
+      - redis
+
+volumes:
+  redis-data:
