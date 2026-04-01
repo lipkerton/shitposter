@@ -3,6 +3,7 @@ using System.Xml.Serialization;
 using System.Net;
 using System.Text;
 using System.Xml.Linq;
+using StackExchange.Redis;
 
 namespace listener;
 
@@ -12,6 +13,7 @@ public class Worker : BackgroundService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
     private readonly CookieContainer _cookieContainer;
+    private readonly INewsStorage _newsStorage;
     private DateTime _lastOpenSession = DateTime.MinValue;
     private DateTime _lastGetRealtime = DateTime.MinValue;
 
@@ -19,13 +21,15 @@ public class Worker : BackgroundService
         ILogger<Worker> logger,
         IHttpClientFactory httpClientFactory,
         IConfiguration configuration,
-        CookieContainer cookieContainer
+        CookieContainer cookieContainer,
+        INewsStorage newsStorage
     )
     {
         _logger = logger;
         _httpClientFactory = httpClientFactory;
         _configuration = configuration;
         _cookieContainer = cookieContainer;
+        _newsStorage = newsStorage;
     }
     protected override async Task ExecuteAsync(CancellationToken cancelToken)
     {
@@ -102,17 +106,20 @@ public class Worker : BackgroundService
                     }
                 }
                 if (DateTime.UtcNow - _lastGetRealtime >= getRealtimeNewsByProductINT) {
-                    (bool ResponseCode, IEnumerable<XElement>? newsList) getRealtimeNewsByProduct = await GetRealtimeNewsByProduct(
+                    (bool IsSuccessStatusCode, IEnumerable<XElement>? newsList) getRealtimeNewsByProduct = await GetRealtimeNewsByProduct(
                         getRealtimeNewsByProductURL, getRealtimeNewsByProductXML, cancelToken
                     );
 
-                    if (getRealtimeNewsByProduct.ResponseCode)
+                    if (getRealtimeNewsByProduct.IsSuccessStatusCode)
                     {
-                        List<Task<(XElement, XElement?, XElement?)>>? elaborate = getRealtimeNewsByProduct.newsList?.Select(
+
+                        List<Task<(string, string?, string?, string?)>>? elaborate = getRealtimeNewsByProduct.newsList?.Select(
                             news => GetEntireNewsByID(getEntireNewsByIdURL, getEntireNewsByIdXML, news, cancelToken)
                         ).ToList();
                         if (elaborate != null) {
-                            (XElement, XElement?, XElement?)[] result = await Task.WhenAll(elaborate);
+                            #pragma warning disable CS8619
+                            (string, string, string, string)[] result = await Task.WhenAll(elaborate);
+                            await _newsStorage.SaveNews(result);
                         }
                         _lastGetRealtime = DateTime.UtcNow;
                         _logger.LogInformation($"Новости получены. Следующий запрос через {getRealtimeNewsByProductINT} минут...");                        
@@ -177,7 +184,7 @@ public class Worker : BackgroundService
         return (response.IsSuccessStatusCode, null);
     }
 
-    private async Task<(XElement, XElement?, XElement?)> GetEntireNewsByID(string url, string path, XElement element, CancellationToken cancelToken)
+    private async Task<(string, string?, string?, string?)> GetEntireNewsByID(string url, string path, XElement element, CancellationToken cancelToken)
     {
         HttpClient client = _httpClientFactory.CreateClient("SOAPClient");
         XDocument xmlDocument = XDocument.Load(path);
@@ -204,12 +211,13 @@ public class Worker : BackgroundService
                     .Element(xmlNamespace + "Body")?
                     .Element(apiNamespace + "genmresp")?
                     .Element(apiNamespace + "mbn");
-            XElement? newsContent = xmlBody?.Element(apiNamespace + "c"),
-                      newsHeader  = xmlBody?.Element(apiNamespace + "h");
-            return (newsId, newsHeader, newsContent);
+            string? newsContent = xmlBody?.Element(apiNamespace + "c")?.ToString(),
+                    newsHeader  = xmlBody?.Element(apiNamespace + "h")?.ToString(),
+                    newsPubDate = xmlBody?.Element(apiNamespace + "pd")?.ToString();
+            return (newsId.ToString(), newsHeader, newsContent, newsPubDate);
         }
         _logger.LogInformation("Ответ: {Body}", responseContent);
 
-        return  (newsId, null, null);
+        return  (newsId.ToString(), null, null, null);
     }
 }
