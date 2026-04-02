@@ -26,6 +26,7 @@ services:
       - ApiSettings__GetEntireNewsByID__Endpoint=http://localhost:8000/IFXService.svc/GetEntireNewsByID
       - ApiSettings__GetEntireNewsByID__XML=GetEntireNewsByID.xml
       - ApiSettings__RequestsFolder=/app/Requests
+      - ApiSettings__CleanUpInterval=2880
     volumes:
       - ./Requests:/app/Requests
     depends_on:
