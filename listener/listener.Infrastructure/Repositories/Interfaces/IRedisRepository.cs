@@ -1,7 +1,7 @@
 using listener.listener.Domain.Entities;
-namespace listener.listener.Application.Services.Interfaces;
+namespace listener.listener.Infrastructure.Repositories.Interfaces;
 
-public interface INewsStorage
+public interface IRedisRepository
 {
     Task SaveNews(List<NewsItem> newsItem);
     Task CleanUpOldNews();

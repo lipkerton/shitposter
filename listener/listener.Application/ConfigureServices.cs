@@ -1,5 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using listener.listener.Application.Services.Interfaces;
 using listener.listener.Application.Services;
 using listener.listener.Domain.Configuration;

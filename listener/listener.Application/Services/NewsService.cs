@@ -1,3 +1,4 @@
+using listener.listener.Infrastructure.Repositories.Interfaces;
 using listener.listener.Application.Services.Interfaces;
 using listener.listener.Domain.Configuration;
 using listener.listener.Domain.Entities;
@@ -8,7 +9,7 @@ namespace listener.listener.Application.Services;
 public class NewsService : INewsService
 {
     private readonly IInterfaxGateway _gateway;
-    private readonly INewsStorage _repository;
+    private readonly IRedisRepository _repository;
     private readonly APISettings _settings;
     private DateTime _lastOpenSession = DateTime.MinValue;
     private DateTime _lastGetRealtime = DateTime.MinValue;
