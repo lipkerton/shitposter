@@ -1,7 +1,9 @@
-using listener.listener.Application.Services.Interfaces;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+using listener.listener.Infrastructure.Gateways.Interfaces;
 using listener.listener.Domain.Configuration;
 using listener.listener.Domain.Entities;
-namespace listener.listener.Infrastructure.Gateway;
+namespace listener.listener.Infrastructure.Gateways;
 
 public class InterfaxGateway : IInterfaxGateway
 {

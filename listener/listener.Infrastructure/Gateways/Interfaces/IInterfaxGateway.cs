@@ -1,5 +1,5 @@
 using listener.listener.Domain.Entities;
-namespace listener.listener.Application.Services.Interfaces;
+namespace listener.listener.Infrastructure.Gateways.Interfaces;
 
 public interface IInterfaxGateway
 {

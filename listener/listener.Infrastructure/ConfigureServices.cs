@@ -1,9 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using listener.listener.Domain.Interfaces;
 using listener.listener.Infrastructure.Gateways;
 using listener.listener.Infrastructure.Repositories;
 using listener.listener.Domain.Configuration;
+
 using StackExchange.Redis;
 using System.Net;
 using listener.listener.Infrastructure.Repositories.Interfaces;
@@ -18,6 +18,7 @@ public static class ConfigureServices
         services.AddSingleton<IConnectionMultiplexer>(sp =>
             ConnectionMultiplexer.Connect(configuration.GetValue("Redis:RedisConnection"))
         );
+        services.AddSingleton<IInterfaxGateway, InterfaxGateway>();
         services.AddSingleton<IRedisRepository, RedisRepository>();
         services.AddSingleton<CookieContainer>();
         services.AddHttpClient("SOAPClient")

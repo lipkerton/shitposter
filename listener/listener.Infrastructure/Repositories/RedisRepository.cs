@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using listener.listener.Domain.Configuration;
 using listener.listener.Domain.Entities;
@@ -13,8 +15,8 @@ public class RedisRepository : IRedisRepository
     private const string NewsHashPrefix = "news:";
     private const string SortedSetKey = "news:timeline";
 
-    public RedisNewsStorage (
-        IOption<APISettings> settings,
+    public RedisRepository (
+        IOptions<APISettings> settings,
         IConnectionMultiplexer redisConnection
     )
     {

@@ -6,7 +6,7 @@ namespace listener.listener.Application;
 
 public class ConfigureServices
 {
-    public static IServiceCollection AddApplicationService (this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<APISettings>(configuration.GetSection("APISettings"));
         services.AddScoped<INewsService, NewsService>();
