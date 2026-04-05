@@ -1,11 +1,10 @@
-namespace listener.listener.Domain.Entities;
-
+namespace listener.Domain.Entities;
 
 public class NewsItem
 {
-    public string Id { get; set; }
+    public long Id { get; set; }
     public DateTime PubDate { get; set; }
-    public string Header { get; set; }
-    public string Content { get; set; }
-
+    public required string Header { get; set; }
+    public string? Content { get; set; }
 }
+    

@@ -1,6 +1,0 @@
-/Users/petrpetuhov/Dev/Code/shitposter/listener/listener.Infrastructure/obj/Debug/net9.0/listener.Infrastructure.csproj.AssemblyReference.cache
-/Users/petrpetuhov/Dev/Code/shitposter/listener/listener.Infrastructure/obj/Debug/net9.0/listener.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
-/Users/petrpetuhov/Dev/Code/shitposter/listener/listener.Infrastructure/obj/Debug/net9.0/listener.Infrastructure.AssemblyInfoInputs.cache
-/Users/petrpetuhov/Dev/Code/shitposter/listener/listener.Infrastructure/obj/Debug/net9.0/listener.Infrastructure.AssemblyInfo.cs
-/Users/petrpetuhov/Dev/Code/shitposter/listener/listener.Infrastructure/obj/Debug/net9.0/listener.Infrastructure.csproj.CoreCompileInputs.cache
-/Users/petrpetuhov/Dev/Code/shitposter/listener/listener.Infrastructure/obj/Debug/net9.0/listener.Infrastructure.sourcelink.json
