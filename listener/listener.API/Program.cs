@@ -3,6 +3,7 @@ using System.Reflection;
 using listener.Application;
 using listener.Infrastructure;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 namespace listener.API;
 
@@ -19,9 +20,17 @@ public class Program {
         _logger.Information("Starting Service...");
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
-        builder.Logging.AddSerilog(_logger);
+        builder.Services.AddSerilog(
+            lc => lc
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Information)
+                .Enrich.FromLogContext()
+                .WriteTo.File(Path.Join(builder.Environment.ContentRootPath, "listener.log"))
+        );
         builder.Services.AddApplicationService(builder.Configuration);
         builder.Services.AddInfrastructureServices(builder.Configuration);
+
+        builder.Services.AddHostedService<Worker>();
 
         IHost host = builder.Build();
         host.Run();
