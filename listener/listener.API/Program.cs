@@ -25,7 +25,7 @@ public class Program {
                 .MinimumLevel.Debug()
                 .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Information)
                 .Enrich.FromLogContext()
-                .WriteTo.File(Path.Join(builder.Environment.ContentRootPath, "listener.log"))
+                .WriteTo.Console()
         );
         builder.Services.AddApplicationService(builder.Configuration);
         builder.Services.AddInfrastructureServices(builder.Configuration);
