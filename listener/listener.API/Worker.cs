@@ -34,7 +34,7 @@ public class Worker : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError("Ошибка во время запросов за новостями!");
+                _logger.LogError("Ошибка во время запросов за новостями! {ex}", ex);
             }
         }
     }
@@ -49,7 +49,7 @@ public class Worker : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError("Ошибка во время цикла очистки!");
+                _logger.LogError("Ошибка во время цикла очистки! {ex}", ex);
             } 
         }
     }
