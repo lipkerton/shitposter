@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using listener.Domain.Entities;
 using listener.Domain.Configuration;
+using listener.Application.Services.Interfaces;
 
 namespace listener.Infrastructure.Services;
 
@@ -16,12 +17,11 @@ public class InterfaxGateway : IInterfaxGateway
         IHttpClientFactory httpClientFactory,
         ILogger<InterfaxGateway> logger,
         IOptions<APISettings> settings
-
     )
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
-        _settings = settings;
+        _settings = settings.Value;
     }
     public async Task<bool> OpenSession(CancellationToken cancelToken)
     {
@@ -94,7 +94,7 @@ public class InterfaxGateway : IInterfaxGateway
         ).Where(news => news != null);
     }
 
-    public async Task<NewsItem?> GetEntireNewsByID (NewsItem newsItem, CancellationToken cancelToken)
+    public async Task<NewsItem> GetEntireNewsByID (NewsItem newsItem, CancellationToken cancelToken)
     {
         HttpClient client = _httpClientFactory.CreateClient("SOAPClient");
         string APIUrl = _settings.GetEntireNewsByID.Endpoint;
@@ -118,11 +118,6 @@ public class InterfaxGateway : IInterfaxGateway
         HttpResponseMessage response = await client.PostAsync(APIUrl, content, cancelToken);
 
         string responseContent = await response.Content.ReadAsStringAsync(cancelToken);
-        if (!response.IsSuccessStatusCode)
-        {
-            _logger.LogWarning("Не удалось получить полный текст новости. Статус: {StatusCode}", response.StatusCode);
-            return null;           
-        }
         XDocument xmlResponse = XDocument.Parse(responseContent);
         XElement? xmlBody = 
             xmlResponse.Root?

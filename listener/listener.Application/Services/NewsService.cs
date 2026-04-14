@@ -1,13 +1,15 @@
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using listener.Infrastructure.Repositories.Interfaces;
-using listener.Infrastructure.Services.Interfaces;
 using listener.Application.Services.Interfaces;
+using listener.Domain.Configuration;
 using listener.Domain.Entities;
-using Microsoft.Extensions.Configuration;
 
 
 namespace listener.Application.Services;
 
-public class NewsService : INewsService, BackgroundService
+public class NewsService : BackgroundService, INewsService
 {
     private readonly IInterfaxGateway _gateway;
     private readonly IRedisRepository _repository;
@@ -21,14 +23,14 @@ public class NewsService : INewsService, BackgroundService
     public NewsService(
         IInterfaxGateway gateway,
         IRedisRepository repository,
-        ILogger<NewsService> logger
+        ILogger<NewsService> logger,
         IOptions<APISettings> settings
     )
     {
         _gateway = gateway;
         _logger = logger;
         _repository = repository;
-        _settings = settings;
+        _settings = settings.Value;
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancelToken)
@@ -41,8 +43,8 @@ public class NewsService : INewsService, BackgroundService
     public async Task ExecuteInterfaxAPICalls(CancellationToken cancelToken)
     {
         if (DateTime.UtcNow - _lastOpenSession >= TimeSpan.FromMinutes(
-            _configuration.GetValue<int>("APISettings:OpenSession:Interval", 1440))
-        )
+            _settings.openSession.cleanupInterval
+        ))
         {
             IsAuthenticated = await _gateway.OpenSession(cancelToken);
             _logger.LogInformation("Аутентификация...");
@@ -58,19 +60,21 @@ public class NewsService : INewsService, BackgroundService
             }
         }
         if (DateTime.UtcNow - _lastGetRealtime >= TimeSpan.FromMinutes(
-                _configuration.GetValue<int>("APISettings:GetRealtimeNewsByID:Interval", 60)
-            )
-        )
+            _settings.GetRealtimeNewsByProduct.cleanupInterval   
+        ))
         {
             if (IsAuthenticated) {
                 _logger.LogInformation("Начаты запросы за новостями...");
-                IEnumerable<NewsItem?> severalNews = await _gateway.GetRealtimeNewsByProduct(cancelToken);
-                IEnumerable<Task<NewsItem?>> severalNewsTask = severalNews.Select(
-                    news => _gateway.GetEntireNewsByID(news, cancelToken)
-                ).Where(news => news != null);
-                IEnumerable<NewsItem?> newsItems = await Task.WhenAll(severalNewsTask);
-                await _repository.SaveNews(newsItems);
-                _logger.LogInformation("Новости были успешно сохранены!");
+                NewsItem[]? severalNews = await _gateway.GetRealtimeNewsByProduct(cancelToken);
+                if (severalNews is not null) {
+                    Task<NewsItem>[] severalNewsTask = severalNews.Select(
+                        news => _gateway.GetEntireNewsByID(news, cancelToken)
+                    ).Where(news => news != null);
+                    NewsItem[] newsItems = await Task.WhenAll(severalNewsTask);
+                    await _repository.SaveNews(newsItems);
+                    _logger.LogInformation("Новости были успешно сохранены!");
+                }
+                _logger.LogInformation("Нет новостей за указанный период.");
             }
             else
             {

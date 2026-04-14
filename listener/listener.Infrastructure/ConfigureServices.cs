@@ -15,18 +15,17 @@ public static class ConfigureServices
         IConfiguration configuration
     )
     {
-        RepositorySettings repositorySettings = new RepositorySettings();
-        configuration.GetSection("RepositorySettings").Bind(repositorySettings);
-        services.AddSingleton(repositorySettings);
-        services.AddSingleton<IConnectionMultiplexer>(
-            sp => ConnectionMultiplexer.Connect(
-                repositorySettings.redisRepository.redisConnection
-            )
+        services.Configure<RepositorySettings>(
+            configuration.GetSection("RepositorySettings")
         );
-        services.AddScoped<IRedisRepository, RedisRepository>();
+        // services.AddSingleton<IConnectionMultiplexer>(sp =>
+        // {
+        //     RepositorySettings settings = sp.GetRequiredService<IOptions<RepositorySettings>>().Value;
+        //     return ConnectionMultiplexer.Connect(settings.redisRepository.redisConnection);
+        // });
+        // services.AddScoped<IRedisRepository, RedisRepository>();
         services.AddScoped<IJsonRepository, JsonRepository>();
         services.AddScoped<ILogRepository, LogRepository>();
         return services;
     }
-
 }

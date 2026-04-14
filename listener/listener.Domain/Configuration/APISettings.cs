@@ -12,5 +12,5 @@ public class EndpointSettings
 {
     public string Endpoint { get; set; } = string.Empty;
     public string XML { get; set; } = string.Empty;
-    public int Interval { get; set; }
+    public DateTime Interval { get; set; }
 }
