@@ -2,28 +2,29 @@ using StackExchange.Redis;
 using listener.Domain.Entities;
 using listener.Infrastructure.Repositories.Interfaces;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+
 namespace listener.Infrastructure.Repositories;
 
 public class RedisRepository : IRedisRepository
 {
     private readonly IConnectionMultiplexer _redisConnection;
     private readonly IDatabase _redisDatabase;
-    private readonly IConfiguration _configuration;
+    private readonly RedisRepository _settings;
     private const string NewsHashPrefix = "news:";
     private const string SortedSetKey = "news:timeline";
 
     public RedisRepository(
         IConnectionMultiplexer redisConnection,
-        IConfiguration configuration
+        IOptions<RedisRepository> settings
     )
     {
         _redisConnection = redisConnection;
         _redisDatabase = redisConnection.GetDatabase();
-        _configuration = configuration;
+        _settings = settings.Value;
     }
 
-    public async Task SaveNews (IEnumerable<NewsItem?> newsItems)
+    public async Task SaveNews (NewsItem[] newsItems, CancellationToken cancelToken)
     {
         IBatch batch = _redisDatabase.CreateBatch();
         foreach (NewsItem news in newsItems)
@@ -43,9 +44,9 @@ public class RedisRepository : IRedisRepository
         batch.Execute();
     }
 
-    public async Task CleanupOldNews (TimeSpan cleanupInterval)
+    public async Task CleanupOldNews (CancellationToken cancelToken)
     {
-        long minTicks = DateTime.UtcNow.Subtract(cleanupInterval).Ticks;
+        long minTicks = DateTime.UtcNow.Subtract(_settings.redisRepository.cleanupInterval).Ticks;
         long removed = await _redisDatabase.SortedSetRemoveRangeByScoreAsync(SortedSetKey, 0, minTicks);
     }
 }

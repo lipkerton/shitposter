@@ -1,12 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using listener.Infrastructure.Services.Interfaces;
-using listener.Infrastructure.Repositories.Interfaces;
-using listener.Infrastructure.Services;
-using System.Net;
-using listener.Domain.Configuration;
+﻿using System.Net;
 using StackExchange.Redis;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
+using listener.Domain.Configuration;
 using listener.Infrastructure.Repositories;
+using listener.Infrastructure.Repositories.Interfaces;
 
 namespace listener.Infrastructure;
 
@@ -14,32 +12,17 @@ public static class ConfigureServices
 {
     public static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services,
-        IConfiguration configuration
+        IOptions<RepositorySettings> settings
     )
     {
         services.AddSingleton<IConnectionMultiplexer>(
             sp => ConnectionMultiplexer.Connect(
-                configuration.GetValue<string>(
-                    "Redis:RedisConnection",
-                    "localhost:6379"
-                )
+                settings.RedisRepository.RedisConnection
             )
         );
-        services.AddSingleton<CookieContainer>();
-        services.AddSingleton<IInterfaxGateway, InterfaxGateway>();
-        services.AddSingleton<IRedisRepository, RedisRepository>();
-        services.AddHttpClient("SOAPClient")
-            .ConfigurePrimaryHttpMessageHandler(
-                sp =>
-                {
-                    CookieContainer cookieContainer = sp.GetRequiredService<CookieContainer>();
-                    return new HttpClientHandler
-                    {
-                        CookieContainer = cookieContainer,
-                        UseCookies = true
-                    };
-                }
-            );
+        services.AddScoped<IRedisRepository, RedisRepository>();
+        services.AddScoped<IJsonRepository, JsonRepository>();
+        services.AddScoped<ILogRepository, LogRepository>();
         return services;
     }
 

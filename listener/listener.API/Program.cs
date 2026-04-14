@@ -19,7 +19,14 @@ public class Program {
         _logger.Information("Starting Service...");
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
-        builder.Logging.AddSerilog(_logger);
+        builder.Services.AddSerilog(
+            lc => lc
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Information)
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+        );
+
         builder.Services.AddApplicationService(builder.Configuration);
         builder.Services.AddInfrastructureServices(builder.Configuration);
 

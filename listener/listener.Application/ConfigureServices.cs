@@ -9,8 +9,7 @@ public static class ConfigureServices
 {
     public static IServiceCollection AddApplicationService (this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<INewsService, NewsService>();
-
+        services.AddHostedService<INewsService, NewsService>();
         return services;
     }
 }
