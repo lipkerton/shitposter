@@ -2,18 +2,18 @@ namespace listener.Domain.Configuration;
 
 public class RepositorySettings
 {
-    public JsonRepository jsonRepository { get; set; } = new();
-    public RedisRepository redisRepository { get; set; } = new();
+    public JsonRepositorySettings jsonRepository { get; set; } = new();
+    public RedisRepositorySettings redisRepository { get; set; } = new();
 }
 
-public class JsonRepository
+public class JsonRepositorySettings
 {
-    public string JsonResultFolder { get; set; } = string.Empty;
-    public string CleanupInterval { get; set; } = string.Empty;
+    public string jsonResultFolder { get; set; } = string.Empty;
+    public DateTime cleanupInterval { get; set; }
 }
 
-public class RedisRepository
+public class RedisRepositorySettings
 {
-    public string RedisConnection { get; set; } = string.Empty;
-    public string CleanupInterval { get; set; } = string.Empty;
+    public string redisConnection { get; set; } = string.Empty;
+    public DateTime cleanupInterval { get; set; }
 }

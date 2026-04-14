@@ -24,8 +24,8 @@ public class JsonRepository : IJsonRepository
     public async Task SaveNews(NewsItem[] newsItems, CancellationToken cancelToken) {
         try
         {
-            string jsonResultFolder = _settings.jsonRepository.JsonResultFolder;
-            if (!Directory.Exists(jsonResultFolder)) Directory.CreateDirectory(folder);
+            string jsonResultFolder = _settings.jsonRepository.jsonResultFolder;
+            if (!Directory.Exists(jsonResultFolder)) Directory.CreateDirectory(jsonResultFolder);
             string fileName = $"{DateTime.UtcNow:yyyyMMddHHmmssfffffff}.json";
             string filePath = Path.Combine(jsonResultFolder, fileName);
 

@@ -1,38 +1,35 @@
 using System.Xml.Linq;
-using System.Text;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using listener.Domain.Entities;
-using listener.Infrastructure.Services.Interfaces;
-using System.Collections;
+using listener.Domain.Configuration;
+
 namespace listener.Infrastructure.Services;
 
 public class InterfaxGateway : IInterfaxGateway
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IConfiguration _configuration;
     private readonly ILogger<InterfaxGateway> _logger;
+    private readonly APISettings _settings;
 
     public InterfaxGateway(
         IHttpClientFactory httpClientFactory,
-        IConfiguration configuration,
-        ILogger<InterfaxGateway> logger
+        ILogger<InterfaxGateway> logger,
+        IOptions<APISettings> settings
+
     )
     {
         _httpClientFactory = httpClientFactory;
-        _configuration = configuration;
         _logger = logger;
+        _settings = settings;
     }
     public async Task<bool> OpenSession(CancellationToken cancelToken)
     {
         HttpClient client = _httpClientFactory.CreateClient("SOAPClient");
-        string APIUrl = _configuration.GetValue<string>(
-            "APISettings:OpenSession:APIUrl",
-            "http://localhost:8000/IFXService.svc/OpenSession"
-        );
+        string APIUrl = _settings.OpenSession.Endpoint;
         string xmlPath = Path.Combine(
-            _configuration.GetValue<string>("APISettings:RequestsFolder", "Requests"),
-            _configuration.GetValue<string>("APISettings:OpenSessions:XMLReq", "OpenSession.xml")
+            _settings.XMLRequestsFolder,
+            _settings.OpenSession.XML
         );
         string xmlContent = await File.ReadAllTextAsync(xmlPath, cancelToken);
         
@@ -46,16 +43,13 @@ public class InterfaxGateway : IInterfaxGateway
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<IEnumerable<NewsItem?>> GetRealtimeNewsByProduct (CancellationToken cancelToken)
+    public async Task<NewsItem[]?> GetRealtimeNewsByProduct (CancellationToken cancelToken)
     {
         HttpClient client = _httpClientFactory.CreateClient("SOAPClient");
-        string APIUrl = _configuration.GetValue<string>(
-            "APISettings:GetRealtimeNewsByProduct:APIUrl",
-            "http://localhost:8000/IFXService.svc/GetRealtimeNewsByProduct"
-        );
+        string APIUrl = _settings.GetRealtimeNewsByProduct.Endpoint;
         string xmlPath = Path.Combine(
-            _configuration.GetValue<string>("APISettings:RequestsFolder", "Requests"),
-            _configuration.GetValue<string>("APISettings:GetRealtimeNewsByProduct:XMLReq", "GetRealtimeNewsByProduct.xml")
+            _settings.XMLRequestsFolder,
+            _settings.GetRealtimeNewsByProduct.XML
         );
         string xmlContent = await File.ReadAllTextAsync(xmlPath, cancelToken);
 
@@ -82,7 +76,7 @@ public class InterfaxGateway : IInterfaxGateway
             .Element(apiNamespace + "mbnl")?
             .Elements(apiNamespace + "c_nwli");
 
-        if (xmlBody == null) return Enumerable.Empty<NewsItem>();
+        if (xmlBody == null) return null;
 
         return xmlBody.Select(news => {
                 string? id = news.Element(apiNamespace + "i")?.Value;
@@ -103,13 +97,10 @@ public class InterfaxGateway : IInterfaxGateway
     public async Task<NewsItem?> GetEntireNewsByID (NewsItem newsItem, CancellationToken cancelToken)
     {
         HttpClient client = _httpClientFactory.CreateClient("SOAPClient");
-        string APIUrl = _configuration.GetValue<string>(
-            "APISettings:GetEntireNewsByID:APIUrl",
-            "http://localhost:8000/IFXService.svc/GetEntireNewsID"
-        );
+        string APIUrl = _settings.GetEntireNewsByID.Endpoint;
         string xmlPath = Path.Combine(
-            _configuration.GetValue<string>("APISettings:RequestsFolder", "Requests"),
-            _configuration.GetValue<string>("APISettings:GetEntireNewsByID:XMLReq", "GetEntireNewsByID.xml")
+            _settings.XMLRequestsFolder,
+            _settings.GetEntireNewsByID.XML
         );
         XDocument xmlDocument = XDocument.Load(xmlPath);
         XNamespace xmlNamespace = "http://schemas.xmlsoap.org/soap/envelope/";

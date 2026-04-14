@@ -11,8 +11,8 @@ public class NewsService : INewsService, BackgroundService
 {
     private readonly IInterfaxGateway _gateway;
     private readonly IRedisRepository _repository;
-    private readonly IConfiguration _configuration;
     private readonly ILogger<NewsService> _logger;
+    private readonly APISettings _settings;
     private DateTime _lastOpenSession = DateTime.MinValue;
     private DateTime _lastGetRealtime = DateTime.MinValue;
     private DateTime _lastCleanupInte = DateTime.MinValue;
@@ -21,14 +21,14 @@ public class NewsService : INewsService, BackgroundService
     public NewsService(
         IInterfaxGateway gateway,
         IRedisRepository repository,
-        IConfiguration configuration,
         ILogger<NewsService> logger
+        IOptions<APISettings> settings
     )
     {
         _gateway = gateway;
         _logger = logger;
         _repository = repository;
-        _configuration = configuration;
+        _settings = settings;
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancelToken)

@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using StackExchange.Redis;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using listener.Domain.Configuration;
 using listener.Infrastructure.Repositories;
@@ -12,12 +12,15 @@ public static class ConfigureServices
 {
     public static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services,
-        IOptions<RepositorySettings> settings
+        IConfiguration configuration
     )
     {
+        RepositorySettings repositorySettings = new RepositorySettings();
+        configuration.GetSection("RepositorySettings").Bind(repositorySettings);
+        services.AddSingleton(repositorySettings);
         services.AddSingleton<IConnectionMultiplexer>(
             sp => ConnectionMultiplexer.Connect(
-                settings.RedisRepository.RedisConnection
+                repositorySettings.redisRepository.redisConnection
             )
         );
         services.AddScoped<IRedisRepository, RedisRepository>();

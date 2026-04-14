@@ -1,5 +1,6 @@
 using StackExchange.Redis;
 using listener.Domain.Entities;
+using listener.Domain.Configuration;
 using listener.Infrastructure.Repositories.Interfaces;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Options;
@@ -10,13 +11,13 @@ public class RedisRepository : IRedisRepository
 {
     private readonly IConnectionMultiplexer _redisConnection;
     private readonly IDatabase _redisDatabase;
-    private readonly RedisRepository _settings;
+    private readonly RepositorySettings _settings;
     private const string NewsHashPrefix = "news:";
     private const string SortedSetKey = "news:timeline";
 
     public RedisRepository(
         IConnectionMultiplexer redisConnection,
-        IOptions<RedisRepository> settings
+        IOptions<RepositorySettings> settings
     )
     {
         _redisConnection = redisConnection;
