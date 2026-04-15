@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "JClzgoHEd3E=",
+  "dgSpecHash": "oLyibVkbaUE=",
   "success": true,
   "projectFilePath": "/Users/petrpetuhov/Dev/education/C#_edu/shitposter/listener/listener.API/listener.API.csproj",
   "expectedPackageFiles": [
@@ -35,7 +35,14 @@
     "/Users/petrpetuhov/.nuget/packages/microsoft.extensions.primitives/10.0.5/microsoft.extensions.primitives.10.0.5.nupkg.sha512",
     "/Users/petrpetuhov/.nuget/packages/pipelines.sockets.unofficial/2.2.8/pipelines.sockets.unofficial.2.2.8.nupkg.sha512",
     "/Users/petrpetuhov/.nuget/packages/serilog/4.3.1/serilog.4.3.1.nupkg.sha512",
+    "/Users/petrpetuhov/.nuget/packages/serilog.aspnetcore/10.0.0/serilog.aspnetcore.10.0.0.nupkg.sha512",
+    "/Users/petrpetuhov/.nuget/packages/serilog.extensions.hosting/10.0.0/serilog.extensions.hosting.10.0.0.nupkg.sha512",
+    "/Users/petrpetuhov/.nuget/packages/serilog.extensions.logging/10.0.0/serilog.extensions.logging.10.0.0.nupkg.sha512",
+    "/Users/petrpetuhov/.nuget/packages/serilog.formatting.compact/3.0.0/serilog.formatting.compact.3.0.0.nupkg.sha512",
     "/Users/petrpetuhov/.nuget/packages/serilog.settings.configuration/10.0.0/serilog.settings.configuration.10.0.0.nupkg.sha512",
+    "/Users/petrpetuhov/.nuget/packages/serilog.sinks.console/6.1.1/serilog.sinks.console.6.1.1.nupkg.sha512",
+    "/Users/petrpetuhov/.nuget/packages/serilog.sinks.debug/3.0.0/serilog.sinks.debug.3.0.0.nupkg.sha512",
+    "/Users/petrpetuhov/.nuget/packages/serilog.sinks.file/7.0.0/serilog.sinks.file.7.0.0.nupkg.sha512",
     "/Users/petrpetuhov/.nuget/packages/stackexchange.redis/2.12.14/stackexchange.redis.2.12.14.nupkg.sha512",
     "/Users/petrpetuhov/.nuget/packages/system.diagnostics.eventlog/10.0.5/system.diagnostics.eventlog.10.0.5.nupkg.sha512",
     "/Users/petrpetuhov/.nuget/packages/system.io.hashing/10.0.2/system.io.hashing.10.0.2.nupkg.sha512"
