@@ -43,7 +43,7 @@ public class NewsService : BackgroundService, INewsService
     public async Task ExecuteInterfaxAPICalls(CancellationToken cancelToken)
     {
         if (DateTime.UtcNow - _lastOpenSession >= TimeSpan.FromMinutes(
-            _settings.openSession.cleanupInterval
+            _settings.openSession.Interval
         ))
         {
             IsAuthenticated = await _gateway.OpenSession(cancelToken);
@@ -60,7 +60,7 @@ public class NewsService : BackgroundService, INewsService
             }
         }
         if (DateTime.UtcNow - _lastGetRealtime >= TimeSpan.FromMinutes(
-            _settings.GetRealtimeNewsByProduct.cleanupInterval   
+            _settings.getRealtimeNewsByProduct.Interval   
         ))
         {
             if (IsAuthenticated) {

@@ -730,6 +730,7 @@
         "type": "project",
         "framework": ".NETCoreApp,Version=v9.0",
         "dependencies": {
+          "Microsoft.Extensions.Hosting": "10.0.5",
           "listener.Infrastructure": "1.0.0"
         },
         "compile": {
@@ -1883,34 +1884,32 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\nikto\\.nuget\\packages\\": {}
+    "/Users/petrpetuhov/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "F:\\CODE\\C#_code\\shitpost_listener\\listener\\listener.API\\listener.API.csproj",
+      "projectUniqueName": "/Users/petrpetuhov/Dev/education/C#_edu/shitposter/listener/listener.API/listener.API.csproj",
       "projectName": "listener.API",
-      "projectPath": "F:\\CODE\\C#_code\\shitpost_listener\\listener\\listener.API\\listener.API.csproj",
-      "packagesPath": "C:\\Users\\nikto\\.nuget\\packages\\",
-      "outputPath": "F:\\CODE\\C#_code\\shitpost_listener\\listener\\listener.API\\obj\\",
+      "projectPath": "/Users/petrpetuhov/Dev/education/C#_edu/shitposter/listener/listener.API/listener.API.csproj",
+      "packagesPath": "/Users/petrpetuhov/.nuget/packages/",
+      "outputPath": "/Users/petrpetuhov/Dev/education/C#_edu/shitposter/listener/listener.API/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\nikto\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "/Users/petrpetuhov/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "F:\\CODE\\C#_code\\shitpost_listener\\listener\\listener.Application\\listener.Application.csproj": {
-              "projectPath": "F:\\CODE\\C#_code\\shitpost_listener\\listener\\listener.Application\\listener.Application.csproj"
+            "/Users/petrpetuhov/Dev/education/C#_edu/shitposter/listener/listener.Application/listener.Application.csproj": {
+              "projectPath": "/Users/petrpetuhov/Dev/education/C#_edu/shitposter/listener/listener.Application/listener.Application.csproj"
             }
           }
         }
@@ -1925,7 +1924,7 @@
         "auditLevel": "low",
         "auditMode": "all"
       },
-      "SdkAnalysisLevel": "10.0.100"
+      "SdkAnalysisLevel": "10.0.200"
     },
     "frameworks": {
       "net10.0": {
@@ -1960,7 +1959,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.201/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",

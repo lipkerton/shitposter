@@ -1,9 +1,11 @@
 using System.Xml.Linq;
+using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using listener.Domain.Entities;
 using listener.Domain.Configuration;
 using listener.Application.Services.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace listener.Infrastructure.Services;
 
@@ -26,10 +28,10 @@ public class InterfaxGateway : IInterfaxGateway
     public async Task<bool> OpenSession(CancellationToken cancelToken)
     {
         HttpClient client = _httpClientFactory.CreateClient("SOAPClient");
-        string APIUrl = _settings.OpenSession.Endpoint;
+        string APIUrl = _settings.openSession.Endpoint;
         string xmlPath = Path.Combine(
             _settings.XMLRequestsFolder,
-            _settings.OpenSession.XML
+            _settings.openSession.XML
         );
         string xmlContent = await File.ReadAllTextAsync(xmlPath, cancelToken);
         
@@ -43,13 +45,13 @@ public class InterfaxGateway : IInterfaxGateway
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<NewsItem[]?> GetRealtimeNewsByProduct (CancellationToken cancelToken)
+    public async Task<NewsItem[]> GetRealtimeNewsByProduct (CancellationToken cancelToken)
     {
         HttpClient client = _httpClientFactory.CreateClient("SOAPClient");
-        string APIUrl = _settings.GetRealtimeNewsByProduct.Endpoint;
+        string APIUrl = _settings.getRealtimeNewsByProduct.Endpoint;
         string xmlPath = Path.Combine(
             _settings.XMLRequestsFolder,
-            _settings.GetRealtimeNewsByProduct.XML
+            _settings.getRealtimeNewsByProduct.XML
         );
         string xmlContent = await File.ReadAllTextAsync(xmlPath, cancelToken);
 
@@ -60,8 +62,8 @@ public class InterfaxGateway : IInterfaxGateway
 
         if (!response.IsSuccessStatusCode)
         {
-            _logger.LogWarning("Не удалось получить список новостей. Статус: {StatusCode}", response.StatusCode);
-            return Enumerable.Empty<NewsItem>();
+            _logger.LogError("Не удалось получить список новостей. Статус: {StatusCode}", response.StatusCode);
+            return Array.Empty<NewsItem>();
         }
 
         string responseContent = await response.Content.ReadAsStringAsync(cancelToken);
@@ -76,31 +78,53 @@ public class InterfaxGateway : IInterfaxGateway
             .Element(apiNamespace + "mbnl")?
             .Elements(apiNamespace + "c_nwli");
 
-        if (xmlBody == null) return null;
+        if (xmlBody == null) {
+            _logger.LogWarning("Нет новостей за указанный период!");
+            return Array.Empty<NewsItem>();
+        }
+        
+        List<NewsItem> newsItems = new List<NewsItem>();
+        foreach (XElement element in xmlBody)
+        {
+            string? id = element.Element(apiNamespace + "i")?.Value;
+            string? header = element.Element(apiNamespace + "h")?.Value;
+            string? pubDateStr = element.Element(apiNamespace + "pd")?.Value; // DateTime.Parse(element.Element(apiNamespace + "pd")?.Value);
 
-        return xmlBody.Select(news => {
-                string? id = news.Element(apiNamespace + "i")?.Value;
-                string? header = news.Element(apiNamespace + "h")?.Value;
-                DateTime pubDate = DateTime.Parse(news.Element(apiNamespace + "pd")?.Value);
-
-                if (id is null) return null;
-
-                return new NewsItem {
-                    Id = id,
-                    PubDate = pubDate,
-                    Header = header
-                };
+            if (!DateTime.TryParse(pubDateStr, out DateTime pubDate))
+            {
+                _logger.LogWarning("Некорректная дата, пропускаем новость. Дата: {pubDateStr}", pubDateStr);
+                continue;
             }
-        ).Where(news => news != null);
+            
+            NewsItem newsItem = new NewsItem
+            {
+                Id = id ?? string.Empty,
+                Header = header ?? string.Empty,
+                PubDate = pubDate
+            };
+            ValidationContext validationContext = new ValidationContext(newsItem);
+            List<ValidationResult> validationResults = new List<ValidationResult>();
+
+            if (Validator.TryValidateObject(newsItem, validationContext, validationResults, validateAllProperties: true))
+            {
+                newsItems.Add(newsItem);
+            }
+            else
+            {
+                string validationError = string.Join("; ", validationResults.Select(r => r.ErrorMessage));
+                _logger.LogWarning("Пропущена новость. Ошибки в данных: {validationError}", validationError);
+            }
+        }
+        return newsItems.ToArray<NewsItem>();
     }
 
     public async Task<NewsItem> GetEntireNewsByID (NewsItem newsItem, CancellationToken cancelToken)
     {
         HttpClient client = _httpClientFactory.CreateClient("SOAPClient");
-        string APIUrl = _settings.GetEntireNewsByID.Endpoint;
+        string APIUrl = _settings.getEntireNewsByID.Endpoint;
         string xmlPath = Path.Combine(
             _settings.XMLRequestsFolder,
-            _settings.GetEntireNewsByID.XML
+            _settings.getEntireNewsByID.XML
         );
         XDocument xmlDocument = XDocument.Load(xmlPath);
         XNamespace xmlNamespace = "http://schemas.xmlsoap.org/soap/envelope/";
@@ -112,7 +136,7 @@ public class InterfaxGateway : IInterfaxGateway
             .Add(newsId);
 
         string xmlContent = await File.ReadAllTextAsync(xmlPath, cancelToken);
-        StringContent content = new StringContent(xmlDocument.ToString(), Encoding.UTF8, "text/xml");
+        StringContent content = new StringContent(xmlContent.ToString(), Encoding.UTF8, "text/xml");
 
         _logger.LogInformation("Запрос на {url}", APIUrl);
         HttpResponseMessage response = await client.PostAsync(APIUrl, content, cancelToken);
