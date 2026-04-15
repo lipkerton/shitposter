@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using listener.Domain.Entities;
 using listener.Domain.Configuration;
+using listener.Domain.Constants;
 using listener.Application.Services.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
@@ -27,75 +28,69 @@ public class InterfaxGateway : IInterfaxGateway
     }
     public async Task<bool> OpenSession(CancellationToken cancelToken)
     {
-        HttpClient client = _httpClientFactory.CreateClient("SOAPClient");
+        HttpClient client = _httpClientFactory.CreateClient(AppConstants.httpClientName);
         string APIUrl = _settings.openSession.Endpoint;
         string xmlPath = Path.Combine(
             _settings.XMLRequestsFolder,
             _settings.openSession.XML
         );
         string xmlContent = await File.ReadAllTextAsync(xmlPath, cancelToken);
-        
-        StringContent content = new StringContent(xmlContent, Encoding.UTF8, "text/xml");
-
-        _logger.LogInformation("Запрос на {url}", APIUrl);
+        StringContent content = new StringContent(xmlContent, Encoding.UTF8, AppConstants.httpContentType);
+        _logger.LogInformation(AppConstants.logRequestMessageInfo, APIUrl);
         HttpResponseMessage response = await client.PostAsync(APIUrl, content, cancelToken);
-
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError(AppConstants.logStatusCodeError, APIUrl, response.StatusCode);
+            return response.IsSuccessStatusCode;
+        }
         string responseContent = await response.Content.ReadAsStringAsync(cancelToken);
-        _logger.LogInformation("{Body}", responseContent);
+        _logger.LogInformation(AppConstants.logRequestMessageInfo, responseContent);
         return response.IsSuccessStatusCode;
     }
 
     public async Task<NewsItem[]> GetRealtimeNewsByProduct (CancellationToken cancelToken)
     {
-        HttpClient client = _httpClientFactory.CreateClient("SOAPClient");
+        HttpClient client = _httpClientFactory.CreateClient(AppConstants.httpClientName);
         string APIUrl = _settings.getRealtimeNewsByProduct.Endpoint;
         string xmlPath = Path.Combine(
             _settings.XMLRequestsFolder,
             _settings.getRealtimeNewsByProduct.XML
         );
         string xmlContent = await File.ReadAllTextAsync(xmlPath, cancelToken);
-
-        StringContent content = new StringContent(xmlContent, Encoding.UTF8, "text/xml");
-
-        _logger.LogInformation("Запрос на {url}", APIUrl);
+        StringContent content = new StringContent(xmlContent, Encoding.UTF8, AppConstants.httpContentType);
+        _logger.LogInformation(AppConstants.logRequestMessageInfo, APIUrl);
         HttpResponseMessage response = await client.PostAsync(APIUrl, content, cancelToken);
-
         if (!response.IsSuccessStatusCode)
         {
-            _logger.LogError("Не удалось получить список новостей. Статус: {StatusCode}", response.StatusCode);
+            _logger.LogError(AppConstants.logStatusCodeError, APIUrl, response.StatusCode);
             return Array.Empty<NewsItem>();
         }
-
         string responseContent = await response.Content.ReadAsStringAsync(cancelToken);
         
         XDocument xmlResponse = XDocument.Parse(responseContent);
-        XNamespace xmlNamespace = "http://schemas.xmlsoap.org/soap/envelope/";
-        XNamespace apiNamespace = "http://ifx.ru/IFX3WebService";
-        
+        XNamespace xmlNamespace = AppConstants.xmlNamespace;
+        XNamespace apiNamespace = AppConstants.apiNamespace;
         IEnumerable<XElement>? xmlBody = xmlResponse.Root?
-            .Element(xmlNamespace + "Body")?
-            .Element(apiNamespace + "grnmresp")?
-            .Element(apiNamespace + "mbnl")?
-            .Elements(apiNamespace + "c_nwli");
-
+            .Element(xmlNamespace + AppConstants.xmlBodyTag)?
+            .Element(apiNamespace + AppConstants.responseXmlGenmrespTag)?
+            .Element(apiNamespace + AppConstants.responseXmlMbnlTag)?
+            .Elements(apiNamespace + AppConstants.responseXmlC_nwliTag);
         if (xmlBody == null) {
-            _logger.LogWarning("Нет новостей за указанный период!");
+            _logger.LogWarning(AppConstants.logEmptyNewsWarning);
             return Array.Empty<NewsItem>();
         }
         
         List<NewsItem> newsItems = new List<NewsItem>();
         foreach (XElement element in xmlBody)
         {
-            string? id = element.Element(apiNamespace + "i")?.Value;
-            string? header = element.Element(apiNamespace + "h")?.Value;
-            string? pubDateStr = element.Element(apiNamespace + "pd")?.Value; // DateTime.Parse(element.Element(apiNamespace + "pd")?.Value);
-
+            string? id = element.Element(apiNamespace + AppConstants.responseXmlIndexTag)?.Value;
+            string? header = element.Element(apiNamespace + AppConstants.responseXmlHeaderTag)?.Value;
+            string? pubDateStr = element.Element(apiNamespace + AppConstants.responseXmlPubDateTag)?.Value; // DateTime.Parse(element.Element(apiNamespace + "pd")?.Value);
             if (!DateTime.TryParse(pubDateStr, out DateTime pubDate))
             {
-                _logger.LogWarning("Некорректная дата, пропускаем новость. Дата: {pubDateStr}", pubDateStr);
+                _logger.LogWarning(AppConstants.logValidationError, pubDateStr);
                 continue;
             }
-            
             NewsItem newsItem = new NewsItem
             {
                 Id = id ?? string.Empty,
@@ -104,7 +99,6 @@ public class InterfaxGateway : IInterfaxGateway
             };
             ValidationContext validationContext = new ValidationContext(newsItem);
             List<ValidationResult> validationResults = new List<ValidationResult>();
-
             if (Validator.TryValidateObject(newsItem, validationContext, validationResults, validateAllProperties: true))
             {
                 newsItems.Add(newsItem);
@@ -112,46 +106,52 @@ public class InterfaxGateway : IInterfaxGateway
             else
             {
                 string validationError = string.Join("; ", validationResults.Select(r => r.ErrorMessage));
-                _logger.LogWarning("Пропущена новость. Ошибки в данных: {validationError}", validationError);
+                _logger.LogWarning(AppConstants.logValidationError, validationError);
             }
         }
         return newsItems.ToArray<NewsItem>();
     }
 
-    public async Task<NewsItem> GetEntireNewsByID (NewsItem newsItem, CancellationToken cancelToken)
+    public async Task<NewsItem?> GetEntireNewsByID (NewsItem newsItem, CancellationToken cancelToken)
     {
-        HttpClient client = _httpClientFactory.CreateClient("SOAPClient");
+        HttpClient client = _httpClientFactory.CreateClient(AppConstants.httpClientName);
         string APIUrl = _settings.getEntireNewsByID.Endpoint;
         string xmlPath = Path.Combine(
             _settings.XMLRequestsFolder,
             _settings.getEntireNewsByID.XML
         );
         XDocument xmlDocument = XDocument.Load(xmlPath);
-        XNamespace xmlNamespace = "http://schemas.xmlsoap.org/soap/envelope/";
-        XNamespace apiNamespace = "http://ifx.ru/IFX3WebService";
-        XElement newsId = new XElement("mbnid", newsItem.Id);
+        XNamespace xmlNamespace = AppConstants.xmlNamespace;
+        XNamespace apiNamespace = AppConstants.apiNamespace;
+        XElement newsId = new XElement(AppConstants.requestXmlMbnidTag, newsItem.Id);
         xmlDocument.Root?
-            .Element(xmlNamespace + "Body")?
-            .Element(apiNamespace + "genmreq")?
+            .Element(xmlNamespace + AppConstants.xmlBodyTag)?
+            .Element(apiNamespace + AppConstants.requestXmlGenmreqTag)?
             .Add(newsId);
 
         string xmlContent = await File.ReadAllTextAsync(xmlPath, cancelToken);
-        StringContent content = new StringContent(xmlContent.ToString(), Encoding.UTF8, "text/xml");
+        StringContent content = new StringContent(xmlContent.ToString(), Encoding.UTF8, AppConstants.httpContentType);
 
-        _logger.LogInformation("Запрос на {url}", APIUrl);
+        _logger.LogInformation(AppConstants.logRequestMessageInfo, APIUrl);
         HttpResponseMessage response = await client.PostAsync(APIUrl, content, cancelToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError(AppConstants.logStatusCodeError, APIUrl, response.StatusCode);
+            return null;
+        }
 
         string responseContent = await response.Content.ReadAsStringAsync(cancelToken);
         XDocument xmlResponse = XDocument.Parse(responseContent);
         XElement? xmlBody = 
             xmlResponse.Root?
-                .Element(xmlNamespace + "Body")?
-                .Element(apiNamespace + "genmresp")?
-                .Element(apiNamespace + "mbn");
-        string? newsContent = xmlBody?.Element(apiNamespace + "c")?.ToString();
+                .Element(xmlNamespace + AppConstants.xmlBodyTag)?
+                .Element(apiNamespace + AppConstants.responseXmlGenmrespTag)?
+                .Element(apiNamespace + AppConstants.responseXmlMbnTag);
+        string? newsContent = xmlBody?.Element(apiNamespace + AppConstants.responseXmlContentTag)?.ToString();
 
         if (newsContent == null) return newsItem; else newsItem.Content = newsContent; 
-        _logger.LogInformation("Ответ: {Body}", responseContent);
+        _logger.LogInformation(AppConstants.logRequestMessageInfo, responseContent);
         return newsItem;
     }
 }
