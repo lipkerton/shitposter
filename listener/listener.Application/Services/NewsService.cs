@@ -13,17 +13,16 @@ namespace listener.Application.Services;
 public class NewsService : BackgroundService, INewsService
 {
     private readonly IInterfaxGateway _gateway;
-    private readonly IRedisRepository _repository;
+    private readonly IJsonRepository _repository;
     private readonly ILogger<NewsService> _logger;
     private readonly APISettings _settings;
     private DateTime _lastOpenSession = DateTime.MinValue;
     private DateTime _lastGetRealtime = DateTime.MinValue;
-    private DateTime _lastCleanupInte = DateTime.MinValue;
 
     private bool IsAuthenticated;
     public NewsService(
         IInterfaxGateway gateway,
-        IRedisRepository repository,
+        IJsonRepository repository,
         ILogger<NewsService> logger,
         IOptions<APISettings> settings
     )
@@ -72,11 +71,14 @@ public class NewsService : BackgroundService, INewsService
                 _logger.LogWarning(AppConstants.logEmptyNewsWarning);
                 return;
             }
-            IEnumerable<Task<NewsItem>> severalNewsTask = severalNews.Select(
+            IEnumerable<Task<NewsItem?>> severalNewsTask = severalNews.Select(
                 news => _gateway.GetEntireNewsByID(news, cancelToken)
-            ).Where(news => news is not null);
-            NewsItem[] newsItems = await Task.WhenAll(severalNewsTask);
-            await _repository.SaveNews(newsItems, cancelToken);
+            );
+            NewsItem?[] newsItems = await Task.WhenAll(severalNewsTask);
+            await _repository.SaveNews(
+                newsItems.OfType<NewsItem>().ToArray(),
+                cancelToken
+            );
         }
     }
 }

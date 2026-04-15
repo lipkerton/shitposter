@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Net;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using listener.Application.Services.Interfaces;
 using listener.Application.Services;
@@ -20,7 +21,7 @@ public static class ConfigureServices
                 };
             }
         );
-        services.AddHostedService<INewsService, NewsService>();
+        services.AddHostedService<NewsService>();
         return services;
     }
 }
