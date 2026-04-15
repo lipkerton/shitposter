@@ -75,8 +75,8 @@ public class InterfaxGateway : IInterfaxGateway
             .Element(apiNamespace + AppConstants.responseXmlGenmrespTag)?
             .Element(apiNamespace + AppConstants.responseXmlMbnlTag)?
             .Elements(apiNamespace + AppConstants.responseXmlC_nwliTag);
+        
         if (xmlBody == null) {
-            _logger.LogWarning(AppConstants.logEmptyNewsWarning);
             return Array.Empty<NewsItem>();
         }
         

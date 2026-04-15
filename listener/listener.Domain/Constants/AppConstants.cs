@@ -10,6 +10,10 @@ public static class AppConstants
     public const string logValidationError = "Пропущена новость. Ошибки в данных: {1}";
     public const string logStatusCodeError = "Не удалось выполнить запрос к эндпоинту {1}. Статус код: {2}";
     public const string logEmptyNewsWarning = "Нет новостей за указанный период.";
+    public const string logRequestStartInfo = "Начаты запросы за новостями...";
+    public const string logAuthInfo = "Аутентификация...";
+    public const string logAuthSuccessInfo = "Аутентификация прошла успешно!";
+    public const string logAuthFailureInfo = "Аутентификация прошла плохо!";
 
     /* 
     константы описывают пространства имен для парсинга ответов API

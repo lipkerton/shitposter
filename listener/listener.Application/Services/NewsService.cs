@@ -5,6 +5,7 @@ using listener.Infrastructure.Repositories.Interfaces;
 using listener.Application.Services.Interfaces;
 using listener.Domain.Configuration;
 using listener.Domain.Entities;
+using listener.Domain.Constants;
 
 
 namespace listener.Application.Services;
@@ -47,15 +48,15 @@ public class NewsService : BackgroundService, INewsService
         ))
         {
             IsAuthenticated = await _gateway.OpenSession(cancelToken);
-            _logger.LogInformation("Аутентификация...");
+            _logger.LogInformation(AppConstants.logAuthInfo);
             if (IsAuthenticated)
             {
-                _logger.LogInformation("Аутентификация прошла успешно!");
+                _logger.LogInformation(AppConstants.logAuthSuccessInfo);
                 _lastOpenSession = DateTime.UtcNow;
             }
             else
             {
-                _logger.LogInformation("Аутентификация прошла неуспешно!");
+                _logger.LogInformation(AppConstants.logAuthFailureInfo);
                 return;
             }
         }
@@ -63,24 +64,19 @@ public class NewsService : BackgroundService, INewsService
             _settings.getRealtimeNewsByProduct.Interval   
         ))
         {
-            if (IsAuthenticated) {
-                _logger.LogInformation("Начаты запросы за новостями...");
-                NewsItem[]? severalNews = await _gateway.GetRealtimeNewsByProduct(cancelToken);
-                if (severalNews is not null) {
-                    Task<NewsItem>[] severalNewsTask = severalNews.Select(
-                        news => _gateway.GetEntireNewsByID(news, cancelToken)
-                    ).Where(news => news != null);
-                    NewsItem[] newsItems = await Task.WhenAll(severalNewsTask);
-                    await _repository.SaveNews(newsItems);
-                    _logger.LogInformation("Новости были успешно сохранены!");
-                }
-                _logger.LogInformation("Нет новостей за указанный период.");
-            }
-            else
+            if (!IsAuthenticated) return;
+            _logger.LogInformation(AppConstants.logRequestStartInfo);
+            NewsItem[] severalNews = await _gateway.GetRealtimeNewsByProduct(cancelToken);
+            if (!severalNews.Any<NewsItem>())
             {
-                _logger.LogInformation("Аутентификация прошла неуспешно - запросы за новостями пропущены!");
+                _logger.LogWarning(AppConstants.logEmptyNewsWarning);
                 return;
             }
+            IEnumerable<Task<NewsItem>> severalNewsTask = severalNews.Select(
+                news => _gateway.GetEntireNewsByID(news, cancelToken)
+            ).Where(news => news is not null);
+            NewsItem[] newsItems = await Task.WhenAll(severalNewsTask);
+            await _repository.SaveNews(newsItems, cancelToken);
         }
     }
 }
