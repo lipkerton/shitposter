@@ -10,6 +10,9 @@ public static class ConfigureServices
 {
     public static IServiceCollection AddApplicationService (this IServiceCollection services, IConfiguration configuration)
     {
+        services.Configure<APISettings>(
+            configuration.GetSection("ApiSettings")
+        );
         services.AddSingleton<CookieContainer>();
         services.AddHttpClient("SOAPClient")
             .ConfigurePrimaryHttpMessageHandler(sp => {
