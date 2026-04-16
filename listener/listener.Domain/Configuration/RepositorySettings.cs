@@ -9,11 +9,11 @@ public class RepositorySettings
 public class JsonRepositorySettings
 {
     public string jsonResultFolder { get; set; } = string.Empty;
-    public DateTime cleanupInterval { get; set; }
+    public int cleanupInterval { get; set; }
 }
 
 public class RedisRepositorySettings
 {
     public string redisConnection { get; set; } = string.Empty;
-    public DateTime cleanupInterval { get; set; }
+    public int cleanupInterval { get; set; }
 }

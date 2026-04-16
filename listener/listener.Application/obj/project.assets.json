@@ -1984,32 +1984,34 @@
     ]
   },
   "packageFolders": {
-    "/Users/petrpetuhov/.nuget/packages/": {}
+    "C:\\Users\\nikto\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/petrpetuhov/Dev/education/C#_edu/shitposter/listener/listener.Application/listener.Application.csproj",
+      "projectUniqueName": "F:\\CODE\\C#_code\\shitpost_listener\\listener\\listener.Application\\listener.Application.csproj",
       "projectName": "listener.Application",
-      "projectPath": "/Users/petrpetuhov/Dev/education/C#_edu/shitposter/listener/listener.Application/listener.Application.csproj",
-      "packagesPath": "/Users/petrpetuhov/.nuget/packages/",
-      "outputPath": "/Users/petrpetuhov/Dev/education/C#_edu/shitposter/listener/listener.Application/obj/",
+      "projectPath": "F:\\CODE\\C#_code\\shitpost_listener\\listener\\listener.Application\\listener.Application.csproj",
+      "packagesPath": "C:\\Users\\nikto\\.nuget\\packages\\",
+      "outputPath": "F:\\CODE\\C#_code\\shitpost_listener\\listener\\listener.Application\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/petrpetuhov/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\nikto\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "/Users/petrpetuhov/Dev/education/C#_edu/shitposter/listener/listener.Infrastructure/listener.Infrastructure.csproj": {
-              "projectPath": "/Users/petrpetuhov/Dev/education/C#_edu/shitposter/listener/listener.Infrastructure/listener.Infrastructure.csproj"
+            "F:\\CODE\\C#_code\\shitpost_listener\\listener\\listener.Infrastructure\\listener.Infrastructure.csproj": {
+              "projectPath": "F:\\CODE\\C#_code\\shitpost_listener\\listener\\listener.Infrastructure\\listener.Infrastructure.csproj"
             }
           }
         }
@@ -2024,7 +2026,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "10.0.200"
+      "SdkAnalysisLevel": "10.0.100"
     },
     "frameworks": {
       "net9.0": {
@@ -2049,11 +2051,15 @@
         "downloadDependencies": [
           {
             "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[9.0.14, 9.0.14]"
+            "version": "[9.0.12, 9.0.12]"
           },
           {
             "name": "Microsoft.NETCore.App.Ref",
-            "version": "[9.0.14, 9.0.14]"
+            "version": "[9.0.12, 9.0.12]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Ref",
+            "version": "[9.0.12, 9.0.12]"
           }
         ],
         "frameworkReferences": {
@@ -2061,7 +2067,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.201/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
